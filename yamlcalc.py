@@ -25,7 +25,7 @@ class CalcContainer(object):
         if isinstance(val, str):
             stripped = val.strip()
             if stripped[0] == ("="):
-                return eval(stripped[1:], CalcContainer.top, {})
+                return eval(stripped[1:], CalcContainer.top, {"_p": self})
             else:
                 return val
 
