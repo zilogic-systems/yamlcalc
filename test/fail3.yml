@@ -1,0 +1,8 @@
+t:
+  no_of_days: 5
+  hours_per_day: 4
+  total_hours: = t.no_of_days * t.hours_per_day
+  per_hour: 100
+  per_student: = t.per_hour * t.total_hours
+  no_of_students: 9
+  total_charges: = t.per_student * t.no_of_student

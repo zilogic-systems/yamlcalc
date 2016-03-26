@@ -1,0 +1,32 @@
+journal:
+  - [2016-03-01, rent, 10000, housing]
+  - [2016-03-02, fuel, 300, vehicle]
+  - [2016-03-03, maintenance, 1000, housing]
+  - [2016-03-03, bike service, 500, vehicle]
+  - [2016-03-03, fruits, 1000, food]
+  - [2016-03-04, snacks, 200, food]
+  - [2016-03-05, water, 35, food]
+  - [2016-03-07, fuel, 300, vehicle]
+  - [2016-03-08, movie, 360, leisure]
+  - [2016-03-08, grocery, 2000, food]
+
+category:
+  - title: Housing
+    value: = sum(i[2] for i in journal if i[3] == "housing")
+
+  - title: Leisure
+    value: = sum(i[2] for i in journal if i[3] == "leisure")
+
+  - title: Food
+    value: = sum(i[2] for i in journal if i[3] == "food")
+
+  - title: Vehicle
+    value: = sum(i[2] for i in journal if i[3] == "vehicle")
+
+total: = sum(i[2] for i in t)
+
+_view:
+  type: chart
+  chart: pie
+  inner_radius: 0.4
+  columns: = category

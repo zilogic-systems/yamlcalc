@@ -1,0 +1,31 @@
+t:
+  courses:
+    linux:
+      title: Using GNU/Linux
+      fees: 2000
+    python:
+      title: Advanced Python
+      fees: 1500
+
+  students:
+    - name: Arun
+      paid: [1000, 500]
+      course: linux
+      total: = sum(_p.paid)
+      course_fee: = t.courses[_p.course].fees
+      rem: = _p.course_fee - _p.total
+
+    - name: Binny
+      paid: [500, 250]
+      course: python
+      total: = sum(_p.paid)
+      course_fee: = t.courses[_p.course].fees
+      rem: = _p.course_fee - _p.total
+
+_view:
+  type: csv
+  columns:
+    - title: Name
+      value: = [s.name for s in t.students]
+    - title: Amount
+      value: = [s.rem for s in t.students]
