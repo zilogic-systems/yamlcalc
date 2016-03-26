@@ -25,7 +25,10 @@ class CalcContainer(object):
         if isinstance(val, str):
             stripped = val.strip()
             if stripped[0] == ("="):
-                return eval(stripped[1:], CalcContainer.top, {"_p": self})
+                try:
+                    return eval(stripped[1:], CalcContainer.top, {"_p": self})
+                except:
+                    return "Error!"
             else:
                 return val
 
@@ -143,6 +146,11 @@ def list_representer(dumper, data):
     return dumper.represent_list(data)
 
 
+def err(msg):
+    sys.stderr.write("{0}\n".format(msg))
+    sys.exit(1)
+
+
 def main():
     if len(sys.argv) != 3:
         print "Usage: yamlcalc <input-file> <output-file>"
@@ -155,19 +163,28 @@ def main():
     yaml.add_constructor(sequence_tag, list_constructor)
     yaml.add_representer(CalcDict, dict_representer)
     yaml.add_representer(CalcList, list_representer)
-        
-    with open(sys.argv[1]) as fp:
-        top = yaml.load(fp)
 
-        dtop = dict(top.get_dict())
-        CalcContainer.top = dtop
+    try:
+        with open(sys.argv[1]) as fp:
+            top = yaml.load(fp)
 
-        view = top.get("_view", {})
-        Writer = WRITERMAP[view.get("type", "raw")]
+            if not isinstance(top, CalcDict):
+                type_name = type(top).__name__
+                err("Error found {0} at top level, expecting dict".format(type_name))
+
+            dtop = dict(top.get_dict())
+            CalcContainer.top = dtop
+
+            view = top.get("_view", {})
+            Writer = WRITERMAP[view.get("type", "raw")]
         
-        with open(sys.argv[2], "w") as outfp:
-            writer = Writer(view)
-            writer.write(top, outfp)
+            with open(sys.argv[2], "w") as outfp:
+                writer = Writer(view)
+                writer.write(top, outfp)
+    except IOError as exc:
+        err("Error opening file: {0}".format(exc))
+    except yaml.YAMLError as exc:
+        err("Error parsing input: {0}".format(exc))
     
 
 if __name__ == "__main__":
