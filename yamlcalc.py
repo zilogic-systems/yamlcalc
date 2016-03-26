@@ -96,12 +96,23 @@ class ChartWriter(object):
         self._conf = conf
 
     def write(self, data, outfp):
-        chart = pygal.Bar()
-        chart.title = self._conf.get("title", "")
+        chart_type = self._conf.get("chart", "pie")
+
+        chart_conf = {}
+        for prop, value in self._conf.items():
+            if prop in ["columns", "chart"]:
+                continue
+            chart_conf[prop] = value
+
+        words = chart_type.split('_')
+        ChartClass = ''.join(word.capitalize() for word in words)
+        
+        chart = getattr(pygal, ChartClass)(**chart_conf)
+
         for col in self._conf["columns"]:
             chart.add(col["title"], col["value"])
 
-        outfp.write('<img src="{0}"/>'.format(chart.render_data_uri()))
+        outfp.write(chart.render())
 
 
 class AsciidocAttrsWriter(object):
