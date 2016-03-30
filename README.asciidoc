@@ -1,2 +1,18 @@
 # YAMLCalc
 A spreadsheet alternative built with YAML and Python.
+
+## Installing
+
+Clone the repo and install using pip.
+
+------
+$ git clone https://github.com/zilogic-systems/yamlcalc.git
+$ pip install --user yamlcalc
+------
+
+## TODO
+
+  * Add support for multiple views.
+  * Add support for proper propogation of errors.
+  * Add better support for validation of view types and chart types.
+  * Add better support for error reporting.
