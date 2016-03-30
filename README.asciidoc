@@ -1,4 +1,7 @@
 # YAMLCalc
+
+image::icon.png[float="right"]
+
 A spreadsheet alternative built with YAML and Python.
 
 ## Installing
