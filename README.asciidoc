@@ -71,7 +71,7 @@ c: 11
 
 |======
 
-=== Lists
+=== List Data Type
 
 If the value of a variable is a list, list operations can be performed on them.
 
@@ -106,6 +106,40 @@ c: 10
 
 |======
 
+TIP: All Python standard built-ins are available within expressions.
+
+=== Mapping Data Type
+
+If the value is a mapping, dictionary operations can be performed. In addition, the keys in the mapping can be accessed using object attribute access notation.
+
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
+
+[source,yaml]
+------
+a:
+  x: 10
+  y: 20
+  z: 30
+b: = a["z"]
+c: = a.y
+------
+
+|
+
+[source,yaml]
+------
+a:
+  x: 10
+  y: 20
+  z: 30
+b: 30
+c: 20
+------
+
+|======
 
 == TODO
 
