@@ -239,7 +239,7 @@ products:
 
 YAMLCalc is not restricted to YAML for output, alternate output
 formats can be specified, to better visualize the data. The output
-type and parameters are specified in the `_view` special variable.
+type and parameters are specified in the `VIEW` special variable.
 
 [options="header",cols="50a,50a"]
 |======
