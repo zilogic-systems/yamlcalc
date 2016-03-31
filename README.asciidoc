@@ -44,6 +44,34 @@ c: 3
 
 |======
 
+=== Variables
+
+The keys of the mapping can be used a variable names within Python expressions. They expand to their corresponding values in the YAML document.
+
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
+
+[source,yaml]
+------
+a: 5
+b: 6
+c: = a + b
+------
+
+|
+
+[source,yaml]
+------
+a: 5
+b: 6
+c: 11
+------
+
+|======
+
+
 == TODO
 
   * Add support for multiple views.
