@@ -188,6 +188,48 @@ c:
 
 |======
 
+=== Nested Structures and `self`
+
+YAML documents can contain nested structures. Expressions within
+container types (lists / dictionaries) can use the special `self`
+variable to refer to the container.
+
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
+
+[source,yaml]
+------
+products:
+- name: zkit-arm-1343
+  price: 2540
+  tax: = self.price * 5 / 100
+  total: = self.price + self.tax
+
+- name: zkit-arm-1769
+  price: 5680
+  tax: = self.price * 5 / 100
+  total: = self.price + self.tax
+------
+
+|
+
+[source,yaml]
+------
+products:
+- name: zkit-arm-1343
+  price: 2540
+  tax: 127
+  total: 2667
+- name: zkit-arm-1769
+  price: 5680
+  tax: 284
+  total: 5964
+------
+
+|======
+
 
 == TODO
 
