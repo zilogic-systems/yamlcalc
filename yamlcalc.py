@@ -225,7 +225,7 @@ def main():
             dtop = dict(top.iteritems())
             CalcContainer.set_top(dtop)
 
-            view = top.get("_view", {})
+            view = top.get("VIEW", {})
             writer_type = view.get("type", "raw")
             writer_func_name = "_".join(writer_type.split("-"))
 
