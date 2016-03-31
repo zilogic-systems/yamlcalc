@@ -108,9 +108,9 @@ c: 10
 
 TIP: All Python standard built-ins are available within expressions.
 
-=== Mapping Data Type
+=== Dict Data Type
 
-If the value is a mapping, dictionary operations can be performed. In addition, the keys in the mapping can be accessed using object attribute access notation.
+If the value is a dictionary, dictionary operations can be performed, as expected. In addition, the keys in the mapping can be accessed using object attribute access notation.
 
 [options="header",cols="50a,50a"]
 |======
@@ -140,6 +140,43 @@ c: 20
 ------
 
 |======
+
+=== Constructing Lists and Dicts
+
+The result of the expressions are not restricted to scalar values, it could also be a list / dict returned from functions or generator expressions.
+
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
+
+[source,yaml]
+------
+a: = range(3)
+b: = [i * 2 for i in a]
+c: = list(sorted(a), reverse=True)
+------
+
+|
+
+[source,yaml]
+------
+a:
+  - 1
+  - 2
+  - 3
+b:
+  - 2
+  - 4
+  - 6
+c:
+  - 3
+  - 2
+  - 1
+------
+
+|======
+
 
 == TODO
 
