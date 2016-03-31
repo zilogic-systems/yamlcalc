@@ -361,7 +361,7 @@ VIEW:
 
 |
 
-image::test/sample4.svg[]
+image::test/sample4.png?raw=true[width=320]
 
 |======
 
