@@ -296,6 +296,7 @@ populate the global namespace, and are accessible in all expressions.
 [source,yaml]
 ------
 DEFS: \|
+
   import math
 
   def abc(a, b, c):
@@ -313,6 +314,54 @@ DEFS: "import math\n\ndef abc(a, b, c):\n  return a + b + c\n"
 a: 0.8414709848078965
 x: 6
 ------
+
+|======
+
+=== Visualizing with Charts
+
+YAMLCalc also provides a mechanism to generate charts from the
+data. Charts are generated using `pygal`.
+
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
+
+[source,yaml]
+------
+journal:
+  - [2016-03-01, rent, 10000, housing]
+  - [2016-03-02, fuel, 300, vehicle]
+  - [2016-03-03, maintenance, 1000, housing]
+  - [2016-03-03, bike service, 500, vehicle]
+  - [2016-03-03, fruits, 1000, food]
+  - [2016-03-04, snacks, 200, food]
+  - [2016-03-05, water, 35, food]
+  - [2016-03-07, fuel, 300, vehicle]
+  - [2016-03-08, movie, 360, leisure]
+  - [2016-03-08, grocery, 2000, food]
+
+VIEW:
+  type: chart
+  chart: pie
+  inner_radius: 0.4
+  columns:
+  - title: Housing
+    value: = sum(i[2] for i in journal if i[3] == "housing")
+
+  - title: Leisure
+    value: = sum(i[2] for i in journal if i[3] == "leisure")
+
+  - title: Food
+    value: = sum(i[2] for i in journal if i[3] == "food")
+
+  - title: Vehicle
+    value: = sum(i[2] for i in journal if i[3] == "vehicle")
+------
+
+|
+
+image::test/sample4.svg[]
 
 |======
 
