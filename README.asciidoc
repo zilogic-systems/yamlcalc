@@ -71,6 +71,41 @@ c: 11
 
 |======
 
+=== Lists
+
+If the value of a variable is a list, list operations can be performed on them.
+
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
+
+[source,yaml]
+------
+a:
+  - 1
+  - 2
+  - 3
+  - 4
+b: = a[1]
+c: = sum(a)
+------
+
+|
+
+[source,yaml]
+------
+a:
+  - 1
+  - 2
+  - 3
+  - 4
+b: 2
+c: 10
+------
+
+|======
+
 
 == TODO
 
