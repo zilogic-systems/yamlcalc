@@ -296,6 +296,7 @@ populate the global namespace, and are accessible in all expressions.
 [source,yaml]
 ------
 DEFS: \|
+
   import math
 
   def abc(a, b, c):
