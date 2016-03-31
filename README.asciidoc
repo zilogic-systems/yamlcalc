@@ -21,7 +21,10 @@ $ pip install --user yamlcalc
 
 The top level element of the YAML file should be a map. If a string in the document starts with an `=` then it is interpreted as a Python expression and is evaluated.
 
-==== Input
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
 
 [source,yaml]
 ------
@@ -30,7 +33,7 @@ b: 6
 c: = 1 + 2
 ------
 
-==== Output
+|
 
 [source,yaml]
 ------
@@ -38,6 +41,8 @@ a: 5
 b: 6
 c: 3
 ------
+
+|======
 
 == TODO
 
