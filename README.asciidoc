@@ -23,5 +23,4 @@ $ pip install --user yamlcalc
   * Add better support for error reporting.
 
 == Credits
-
-Abacus icon from http://www.iconspedia.com/icon/abacus-icon-26575.html
+Thanks to http://www.artistsvalley.com/[ArtistsValley] for the abacus icon: http://www.iconspedia.com/icon/abacus-icon-26575.html
