@@ -4,7 +4,7 @@
 <img src="icon.png" align="right"/>
 ++++++
 
-A spreadsheet alternative built with YAML and Python.
+YAMLCalc is a spreadsheet alternative that beautifully blends YAML and Python, to allow computations to be performed on data stored in YAML format.
 
 == Installing
 
@@ -13,6 +13,30 @@ Clone the repo and install using pip.
 ------
 $ git clone https://github.com/zilogic-systems/yamlcalc.git
 $ pip install --user yamlcalc
+------
+
+== Usage
+
+=== Hello YAMLCalc
+
+The top level element of the YAML file should be a map. If a string in the document starts with an `=` then it is interpreted as a Python expression and is evaluated.
+
+==== Input
+
+[source,yaml]
+------
+a: 5
+b: 6
+c: = 1 + 2
+------
+
+==== Output
+
+[source,yaml]
+------
+a: 5
+b: 6
+c: 3
 ------
 
 == TODO
