@@ -47,7 +47,7 @@ class CalcContainer(object):
             stripped = val.strip()
             if stripped[0] == ("="):
                 try:
-                    return eval(stripped[1:], CalcContainer._top, {"_p": self})
+                    return eval(stripped[1:], CalcContainer._top, {"self": self})
                 except:
                     return "Error!"
             else:
