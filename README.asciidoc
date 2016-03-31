@@ -1,6 +1,8 @@
 = YAMLCalc
 
-image::icon.png[role="right"]
+++++++
+<img src="icon.png" align="right"/>
+++++++
 
 A spreadsheet alternative built with YAML and Python.
 
