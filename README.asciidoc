@@ -4,7 +4,9 @@
 <img src="icon.png" align="right"/>
 ++++++
 
-YAMLCalc is a spreadsheet alternative that beautifully blends YAML and Python, to allow computations to be performed on data stored in YAML format.
+YAMLCalc is a spreadsheet alternative that beautifully blends YAML and
+Python, to allow computations to be performed on data stored in YAML
+format.
 
 == Installing
 
@@ -19,7 +21,9 @@ $ pip install --user yamlcalc
 
 === Hello YAMLCalc
 
-The top level element of the YAML file should be a map. If a string in the document starts with an `=` then it is interpreted as a Python expression and is evaluated.
+The top level element of the YAML file should be a map. If a string in
+the document starts with an `=` then it is interpreted as a Python
+expression and is evaluated.
 
 [options="header",cols="50a,50a"]
 |======
@@ -46,7 +50,9 @@ c: 3
 
 === Variables
 
-The keys of the top level dict can be used as variable names within Python expressions. They expand to their corresponding values in the YAML document.
+The keys of the top level dict can be used as variable names within
+Python expressions. They expand to their corresponding values in the
+YAML document.
 
 [options="header",cols="50a,50a"]
 |======
@@ -71,9 +77,10 @@ c: 11
 
 |======
 
-=== List Data Type
+=== Using Lists
 
-If the value of a variable is a list, list operations can be performed on them.
+If the value of a variable is a list, list operations can be performed
+on them.
 
 [options="header",cols="50a,50a"]
 |======
@@ -108,9 +115,11 @@ c: 10
 
 TIP: All Python standard built-ins are available within expressions.
 
-=== Dict Data Type
+=== Using Dictionaries
 
-If the value is a dictionary, dictionary operations can be performed, as expected. In addition, the keys in the mapping can be accessed using object attribute access notation.
+If the value is a dictionary, dictionary operations can be performed,
+as expected. In addition, the keys in the mapping can be accessed
+using object attribute access notation.
 
 [options="header",cols="50a,50a"]
 |======
@@ -141,9 +150,11 @@ c: 20
 
 |======
 
-=== Constructing Lists and Dicts
+=== Constructing Lists and Dictionaries
 
-The result of the expressions are not restricted to scalar values, it could also be a list / dict returned from functions or generator expressions.
+The result of the expressions are not restricted to scalar values, it
+could also be a list / dict returned from functions or generator
+expressions.
 
 [options="header",cols="50a,50a"]
 |======
@@ -186,4 +197,6 @@ c:
   * Add better support for error reporting.
 
 == Credits
-Thanks to http://www.artistsvalley.com/[ArtistsValley] for the abacus icon: http://www.iconspedia.com/icon/abacus-icon-26575.html
+
+Thanks to http://www.artistsvalley.com/[ArtistsValley] for the abacus
+icon: http://www.iconspedia.com/icon/abacus-icon-26575.html
