@@ -48,11 +48,11 @@ c: 3
 
 |======
 
-=== Variables
+=== Global Variables
 
-The keys of the top level dict can be used as variable names within
-Python expressions. They expand to their corresponding values in the
-YAML document.
+The keys of the top level dict can be used as global variable names
+within Python expressions. They expand to their corresponding values
+in the YAML document.
 
 [options="header",cols="50a,50a"]
 |======
@@ -239,7 +239,8 @@ products:
 
 YAMLCalc is not restricted to YAML for output, alternate output
 formats can be specified, to better visualize the data. The output
-type and parameters are specified in the `VIEW` special variable.
+type and parameters are specified in the `VIEW` special global
+variable.
 
 [options="header",cols="50a,50a"]
 |======
@@ -276,6 +277,41 @@ VIEW:
 Name,Price
 zkit-arm-1343,2667
 zkit-arm-1769,5964
+------
+
+|======
+
+=== Custom Functions
+
+If additional functions are required, they can be defined or imported
+from another module / package. The Python statements in the special
+`DEFS` global variable is executed. Imports and function definition
+populate the global namespace, and are accessible in all expressions.
+
+[options="header",cols="50a,50a"]
+|======
+| Input                    | Output
+|
+
+[source,yaml]
+------
+DEFS: |
+  import math
+
+  def abc(a, b, c):
+    return a + b + c
+
+a: = math.sin(1)
+x: = abc(1, 2, 3)
+------
+
+|
+
+[source,yaml]
+------
+DEFS: "import math\n\ndef abc(a, b, c):\n  return a + b + c\n"
+a: 0.8414709848078965
+x: 6
 ------
 
 |======

@@ -222,7 +222,15 @@ def main():
                 type_name = type(top).__name__
                 err("Top level element should be dict not {0}".format(type_name))
 
-            dtop = dict(top.iteritems())
+            dtop = {}
+
+            defs = top.get("DEFS", "")
+            try:
+                exec defs in dtop
+            except Exception as exc:
+                err("Error executing DEFS: {0}".format(exc))               
+            
+            dtop.update(dict(top.iteritems()))
             CalcContainer.set_top(dtop)
 
             view = top.get("VIEW", {})
