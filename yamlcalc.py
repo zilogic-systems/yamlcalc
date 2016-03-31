@@ -63,10 +63,6 @@ class CalcContainer(object):
         class_name = self.__class__.__name__
         return "{0}({1})".format(class_name, repr(self._data))
 
-    def get_wrapped(self):
-        """Returns the container we are wrapping."""
-        return self._data
-
     @classmethod
     def set_top(cls, top):
         """Sets the top level dict object.
@@ -226,7 +222,7 @@ def main():
                 type_name = type(top).__name__
                 err("Top level element should be dict not {0}".format(type_name))
 
-            dtop = dict(top.get_wrapped())
+            dtop = dict(top.iteritems())
             CalcContainer.set_top(dtop)
 
             view = top.get("_view", {})
