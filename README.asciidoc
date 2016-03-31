@@ -46,7 +46,7 @@ c: 3
 
 === Variables
 
-The keys of the mapping can be used a variable names within Python expressions. They expand to their corresponding values in the YAML document.
+The keys of the top level dict can be used as variable names within Python expressions. They expand to their corresponding values in the YAML document.
 
 [options="header",cols="50a,50a"]
 |======
