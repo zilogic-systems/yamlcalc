@@ -15,9 +15,39 @@ from collections import Mapping
 from collections import OrderedDict
 
 
+class COWDict(object):
+    """Wraps a read-only dictionary, locally storing changes made."""
+
+    def __init__(self, rodict, cow=None):
+        """Initialize the COWDict.
+
+        Args:
+          rodict (dict): the read-only dictionary
+          cow (dict): the dictionary where changes are stored
+        """
+        self._rodict = rodict
+        if cow is None:
+            self._cow = {}
+        else:
+            self._cow = cow
+
+    def __getitem__(self, key):
+        if key in self._cow:
+            return self._cow[key]
+        else:
+            return self._rodict[key]
+
+    def __setitem__(self, key, val):
+        self._cow[key] = val
+
+    def __delitem__(self, key, val):
+        del self._cow[key]
+
+
 class CalcContainer(object):
     """Base class providing evaluation of embedded Python exp."""
 
+    _defs = None
     _top = None
 
     def __init__(self, data):
@@ -47,7 +77,20 @@ class CalcContainer(object):
             stripped = val.strip()
             if stripped[0] == ("="):
                 try:
-                    return eval(stripped[1:], CalcContainer._top, {"self": self})
+                    #
+                    # eval doesn't like a non dict type to be a
+                    # globals. So we specify the top level container
+                    # as locals. But while evaluating the expression
+                    # local variables will get created. For example
+                    # during list comprehension, these should not
+                    # affect the YAML document, and should not be
+                    # visible in other expressions. So we have
+                    # Copy-On-Write dictionary that stores any changes
+                    # made and we discard the changes, once the
+                    # evaluation is done.
+                    #
+                    return eval(stripped[1:], CalcContainer._defs,
+                                COWDict(CalcContainer._top, {"self":self}))
                 except:
                     return "Error!"
             else:
@@ -64,12 +107,14 @@ class CalcContainer(object):
         return "{0}({1})".format(class_name, repr(self._data))
 
     @classmethod
-    def set_top(cls, top):
+    def set_top(cls, defs, top):
         """Sets the top level dict object.
 
         Args:
+          def (dict): custom definitions
           top (dict): the top level dict of the YAML file
         """
+        cls._defs = defs
         cls._top = top
 
 
@@ -170,7 +215,7 @@ def write_raw(conf, data, outfp):
       data (dict): parsed YAML data
       outfp (file): file object to write to
     """
-    outfp.write(yaml.dump(data, default_flow_style=False))
+    outfp.write(yaml.dump(data))
 
 
 def dict_constructor(loader, node):
@@ -222,16 +267,15 @@ def main():
                 type_name = type(top).__name__
                 err("Top level element should be dict not {0}".format(type_name))
 
-            dtop = {}
+            defs = {}
+            defs_str = top.get("DEFS", "")
 
-            defs = top.get("DEFS", "")
             try:
-                exec defs in dtop
+                exec defs_str in defs
             except Exception as exc:
-                err("Error executing DEFS: {0}".format(exc))               
-            
-            dtop.update(dict(top.iteritems()))
-            CalcContainer.set_top(dtop)
+                err("Error executing DEFS: {0}".format(exc))
+
+            CalcContainer.set_top(defs, top)
 
             view = top.get("VIEW", {})
             writer_type = view.get("type", "raw")
