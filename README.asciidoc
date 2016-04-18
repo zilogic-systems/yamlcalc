@@ -374,5 +374,9 @@ image::test/sample4.png?raw=true[width=320]
 
 == Credits
 
-Thanks to http://www.artistsvalley.com/[ArtistsValley] for the abacus
-icon: http://www.iconspedia.com/icon/abacus-icon-26575.html
+  * This project was heavily influenced by the
+    http://code.activestate.com/recipes/355045-spreadsheet/?in=lang-python["Spreadsheet"
+    ActiveState Recipe] by Raymond Hettinger.
+
+  * Thanks to http://www.artistsvalley.com/[ArtistsValley] for the
+    abacus icon: http://www.iconspedia.com/icon/abacus-icon-26575.html
