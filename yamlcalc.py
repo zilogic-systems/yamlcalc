@@ -2,12 +2,14 @@
 
 """YAML and Python based spreadsheet equivalent.
 
-Usage: yamlcalc <infile> <outfile>
+Usage: yamlcalc <infile>
 """
 
 import yaml
 import pygal
 
+import os
+import os.path
 import csv
 import sys
 from collections import Sequence
@@ -133,18 +135,16 @@ class CalcDict(CalcContainer, Mapping):
         return self[attr]
 
 
-def write_csv(conf, data, outfp):
+def write_csv(conf, data, outdir):
     """Write a CSV file.
 
     Args:
       conf (dict): writer parameters
       data (dict): parsed YAML data
-      outfp (file): file object to write to
+      outdir (str): directory to write to
     """
     table = {}
     nrows = []
-
-    writer = csv.writer(outfp)
 
     for col in conf["columns"]:
         title = col["title"]
@@ -156,25 +156,28 @@ def write_csv(conf, data, outfp):
         for value in rows:
             table[title].append(value)
 
-    rowdata = []
-    for col in conf["columns"]:
-        rowdata.append("{0}".format(col["title"]))
-    writer.writerow(rowdata)
+    with open(os.path.join(outdir, "data.csv"), "w") as outfp:
+        writer = csv.writer(outfp)
 
-    for row in range(min(nrows)):
         rowdata = []
         for col in conf["columns"]:
-            rowdata.append("{0}".format(table[col["title"]][row]))
+            rowdata.append("{0}".format(col["title"]))
         writer.writerow(rowdata)
 
+        for row in range(min(nrows)):
+            rowdata = []
+            for col in conf["columns"]:
+                rowdata.append("{0}".format(table[col["title"]][row]))
+            writer.writerow(rowdata)
 
-def write_chart(conf, data, outfp):
+
+def write_chart(conf, data, outdir):
     """Write a chart image.
 
     Args:
       conf (dict): writer parameters
       data (dict): parsed YAML data
-      outfp (file): file object to write to
+      outdir (str): directory to write to
     """
     chart_type = conf.get("chart", "pie")
 
@@ -192,30 +195,33 @@ def write_chart(conf, data, outfp):
     for col in conf["columns"]:
         chart.add(col["title"], col["value"])
 
-    outfp.write(chart.render())
+    with open(os.path.join(outdir, "chart.svg"), "w") as outfp:
+        outfp.write(chart.render())
 
 
-def write_asciidoc_attrs(conf, data, outfp):
+def write_asciidoc_attrs(conf, data, outdir):
     """Write a include set of asciidoc attributes.
 
     Args:
       conf (dict): writer parameters
       data (dict): parsed YAML data
-      outfp (file): file object to write to
+      outdir (str): directory to write to
     """
-    for key, value in conf["value"].iteritems():
-        outfp.write("{{set:{0}:{1}}}\n".format(key, value))
+    with open(os.path.join(outdir, "attrs.adoc"), "w") as outfp:
+        for key, value in conf["value"].iteritems():
+            outfp.write("{{set:{0}:{1}}}\n".format(key, value))
 
 
-def write_raw(conf, data, outfp):
+def write_raw(conf, data, outdir):
     """Write the expanded YAML file.
 
     Args:
       conf (dict): writer parameters
       data (dict): parsed YAML data
-      outfp (file): file object to write to
+      outdir (str): directory to write to
     """
-    outfp.write(yaml.dump(data))
+    with open(os.path.join(outdir, "raw.yml"), "w") as outfp:
+        outfp.write(yaml.dump(data))
 
 
 def dict_constructor(loader, node):
@@ -247,8 +253,8 @@ def err(msg):
 
 def main():
     """Main application entry point."""
-    if len(sys.argv) != 3:
-        print "Usage: yamlcalc <input-file> <output-file>"
+    if len(sys.argv) != 2:
+        print "Usage: yamlcalc <input-file>"
         return
 
     mapping_tag = yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG
@@ -286,8 +292,17 @@ def main():
             except KeyError:
                 err("Error unsupporter writer: {0}".format(writer_type))
 
-            with open(sys.argv[2], "w") as outfp:
-                write(view, top, outfp)
+            outdir, ext = os.path.splitext(sys.argv[1])
+            if os.path.exists(outdir):
+                if not os.path.isdir(outdir):
+                    err("Path exists but is not a directory: {0}".format(outdir))
+            else:
+                try:
+                    os.mkdir(outdir)
+                except OSError as exc:
+                    err("Error create directory: {0}".format(outdir))
+
+            write(view, top, outdir)
     except IOError as exc:
         err("Error opening file: {0}".format(exc))
     except yaml.YAMLError as exc:
