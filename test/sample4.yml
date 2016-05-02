@@ -25,7 +25,7 @@ category:
 
 total: = sum(i[2] for i in t)
 
-_view:
+VIEW:
   type: chart
   chart: pie
   inner_radius: 0.4

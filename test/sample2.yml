@@ -11,13 +11,13 @@ t:
     - name: Arun
       paid: [1000, 500]
       course: linux
-      total: = sum(_p.paid)
-      course_fee: = t.courses[_p.course].fees
-      rem: = _p.course_fee - _p.total
+      total: = sum(self.paid)
+      course_fee: = t.courses[self.course].fees
+      rem: = self.course_fee - self.total
 
     - name: Binny
       paid: [500, 250]
       course: python
-      total: = sum(_p.paid)
-      course_fee: = t.courses[_p.course].fees
-      rem: = _p.course_fee - _p.total
+      total: = sum(self.paid)
+      course_fee: = t.courses[self.course].fees
+      rem: = self.course_fee - self.total
