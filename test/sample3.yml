@@ -22,10 +22,8 @@ t:
       course_fee: = t.courses[self.course].fees
       rem: = self.course_fee - self.total
 
-_view:
+VIEW:
   type: csv
-  columns:
-    - title: Name
-      value: = [s.name for s in t.students]
-    - title: Amount
-      value: = [s.rem for s in t.students]
+  table:
+    columns: ["Name", "Amount"]
+    rows: = [[s.name, s.rem] for s in t.students]

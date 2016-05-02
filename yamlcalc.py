@@ -143,32 +143,10 @@ def write_csv(conf, data, outdir):
       data (dict): parsed YAML data
       outdir (str): directory to write to
     """
-    table = {}
-    nrows = []
-
-    for col in conf["columns"]:
-        title = col["title"]
-        table[title] = []
-
-        rows = col["value"]
-        nrows.append(len(rows))
-
-        for value in rows:
-            table[title].append(value)
-
     with open(os.path.join(outdir, "data.csv"), "w") as outfp:
         writer = csv.writer(outfp)
-
-        rowdata = []
-        for col in conf["columns"]:
-            rowdata.append("{0}".format(col["title"]))
-        writer.writerow(rowdata)
-
-        for row in range(min(nrows)):
-            rowdata = []
-            for col in conf["columns"]:
-                rowdata.append("{0}".format(table[col["title"]][row]))
-            writer.writerow(rowdata)
+        for row in conf["table"]["rows"]:
+            writer.writerow(row)
 
 
 def write_chart(conf, data, outdir):
@@ -179,21 +157,33 @@ def write_chart(conf, data, outdir):
       data (dict): parsed YAML data
       outdir (str): directory to write to
     """
-    chart_type = conf.get("chart", "pie")
+    chart_type = conf.get("chart", None)
+    if chart_type is None:
+        err("Chart type not specified")
 
     chart_conf = {}
     for prop, value in conf.items():
-        if prop in ["columns", "chart"]:
+        if prop in ["table", "chart"]:
             continue
         chart_conf[prop] = value
 
-    words = chart_type.split('_')
-    chart_class = ''.join(word.capitalize() for word in words)
+    if chart_type == "pie" or chart_type == "bar":
+        if char_type == "pie":
+            chart = pygal.Pie(**chart_conf)
+        else:
+            chart = pygal.Bar(**chart_conf)
 
-    chart = getattr(pygal, chart_class)(**chart_conf)
+        for row in conf["table"]["rows"]:
+            chart.add(row[0], row[1])
 
-    for col in conf["columns"]:
-        chart.add(col["title"], col["value"])
+    elif chart_type == "grouped-bar":
+        chart = pygal.Bar(**chart_conf)
+        chart.x_labels = [str(row[0]) for row in conf["table"]["rows"]]
+        for i, col in enumerate(conf["table"]["columns"][1:]):
+            chart.add(col, [row[i+1] for row in conf["table"]["rows"]])
+
+    else:
+        err("Unsupported chart type {0}".format(chart_type))
 
     with open(os.path.join(outdir, "chart.svg"), "w") as outfp:
         outfp.write(chart.render())
