@@ -5,7 +5,13 @@
 Usage: yamlcalc <infile>
 """
 
-import yaml
+from ruamel import yaml
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.comments import CommentedSeq
+from ruamel.yaml import RoundTripConstructor
+from ruamel.yaml import RoundTripRepresenter
+
 import pygal
 
 import os
@@ -58,10 +64,10 @@ class CalcContainer(object):
         Args:
           data (container type): the data wrapped by the container
         """
-        self._data = data
+        pass
 
-    def __getitem__(self, key):
-        """Returns an item from the container.
+    def _evaluate_item(self, val):
+        """Evaluates an item from the container.
 
         If an item is a string, and the string starts with an '=',
         then the string is evaluated as a Python expression.
@@ -69,12 +75,6 @@ class CalcContainer(object):
         Args:
           key: specifies the element to access
         """
-        if CalcContainer._top is self:
-            if key == "_top":
-                return CalcContainer._top
-
-        val = self._data[key]
-
         if isinstance(val, str):
             stripped = val.strip()
             if stripped[0] == ("="):
@@ -92,7 +92,7 @@ class CalcContainer(object):
                     # evaluation is done.
                     #
                     return eval(stripped[1:], CalcContainer._defs,
-                                COWDict(CalcContainer._top, {"self":self}))
+                                COWDict(CalcContainer._top, {"self": self}))
                 except:
                     return "Error!"
             else:
@@ -100,13 +100,6 @@ class CalcContainer(object):
 
         else:
             return val
-
-    def __len__(self):
-        return len(self._data)
-
-    def __repr__(self):
-        class_name = self.__class__.__name__
-        return "{0}({1})".format(class_name, repr(self._data))
 
     @classmethod
     def set_top(cls, defs, top):
@@ -120,19 +113,34 @@ class CalcContainer(object):
         cls._top = top
 
 
-class CalcList(CalcContainer, Sequence):
+class CalcList(CalcContainer, CommentedSeq):
     """list like class that provides exp. evaluation."""
-    pass
+    def __init__(self):
+        CommentedSeq.__init__(self)
+
+    def __getitem__(self, key):
+        val = CommentedSeq.__getitem__(self, key)
+        return self._evaluate_item(val)
 
 
-class CalcDict(CalcContainer, Mapping):
+class CalcDict(CalcContainer, CommentedMap):
     """dict like class that provides exp. evaluation."""
-    def __iter__(self):
-        for item in self._data:
-            yield item
+    def __init__(self):
+        CommentedMap.__init__(self)
+
+    def __getitem__(self, key):
+        if self._top is self:
+            if key == "_top":
+                return self._top
+
+        val = CommentedMap.__getitem__(self, key)
+        return self._evaluate_item(val)
 
     def __getattr__(self, attr):
-        return self[attr]
+        if attr in self.keys():
+            return self[attr]
+        else:
+            raise AttributeError("Key '{}' not found in dictionary".format(attr))
 
 
 def write_csv(conf, data, outdir):
@@ -168,7 +176,7 @@ def write_chart(conf, data, outdir):
         chart_conf[prop] = value
 
     if chart_type == "pie" or chart_type == "bar":
-        if char_type == "pie":
+        if chart_type == "pie":
             chart = pygal.Pie(**chart_conf)
         else:
             chart = pygal.Bar(**chart_conf)
@@ -211,23 +219,32 @@ def write_raw(conf, data, outdir):
       outdir (str): directory to write to
     """
     with open(os.path.join(outdir, "raw.yml"), "w") as outfp:
-        outfp.write(yaml.dump(data))
+        YAML().dump(data, outfp)
 
 
 def dict_constructor(loader, node):
     """Returns a CalcDict from YAML mapping."""
-    odict = OrderedDict(loader.construct_pairs(node))
-    return CalcDict(odict)
+    data = CalcDict()
+    data._yaml_set_line_col(node.start_mark.line, node.start_mark.column)
+    yield data
+    loader.construct_mapping(node, data)
+    loader.set_collection_style(data, node)
 
 
 def list_constructor(loader, node):
     """Returns a CalcList from YAML list."""
-    return CalcList(loader.construct_sequence(node))
+    data = CalcList()
+    data._yaml_set_line_col(node.start_mark.line, node.start_mark.column)
+    if node.comment:
+        data._yaml_add_comment(node.comment)
+    yield data
+    data.extend(loader.construct_rt_sequence(node, data))
+    loader.set_collection_style(data, node)
 
 
 def dict_representer(dumper, data):
     """Returns a YAML mapping from a CalcDict."""
-    return dumper.represent_dict(data.iteritems())
+    return dumper.represent_dict(data)
 
 
 def list_representer(dumper, data):
@@ -244,20 +261,25 @@ def err(msg):
 def main():
     """Main application entry point."""
     if len(sys.argv) != 2:
-        print "Usage: yamlcalc <input-file>"
+        print("Usage: yamlcalc <input-file>")
         return
 
     mapping_tag = yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG
     sequence_tag = yaml.resolver.BaseResolver.DEFAULT_SEQUENCE_TAG
 
-    yaml.add_constructor(mapping_tag, dict_constructor)
-    yaml.add_constructor(sequence_tag, list_constructor)
-    yaml.add_representer(CalcDict, dict_representer)
-    yaml.add_representer(CalcList, list_representer)
+    yaml.add_constructor(mapping_tag, dict_constructor,
+                         Loader=RoundTripConstructor)
+    yaml.add_constructor(sequence_tag, list_constructor,
+                         Loader=RoundTripConstructor)
+
+    yaml.add_representer(CalcDict, dict_representer,
+                         Dumper=RoundTripRepresenter)
+    yaml.add_representer(CalcList, list_representer,
+                         Dumper=RoundTripRepresenter)
 
     try:
         with open(sys.argv[1]) as infp:
-            top = yaml.load(infp)
+            top = YAML().load(infp)
 
             if not isinstance(top, CalcDict):
                 type_name = type(top).__name__
@@ -267,7 +289,7 @@ def main():
             defs_str = top.get("DEFS", "")
 
             try:
-                exec defs_str in defs
+                exec(defs_str, defs)
             except Exception as exc:
                 err("Error executing DEFS: {0}".format(exc))
 
