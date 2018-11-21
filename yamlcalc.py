@@ -5,6 +5,11 @@
 Usage: yamlcalc <infile>
 """
 
+import os
+import os.path
+import csv
+import sys
+
 from ruamel import yaml
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -13,15 +18,6 @@ from ruamel.yaml import RoundTripConstructor
 from ruamel.yaml import RoundTripRepresenter
 
 import pygal
-
-import os
-import os.path
-import csv
-import sys
-from collections import Sequence
-from collections import Mapping
-from collections import OrderedDict
-
 
 class COWDict(object):
     """Wraps a read-only dictionary, locally storing changes made."""
@@ -42,13 +38,13 @@ class COWDict(object):
     def __getitem__(self, key):
         if key in self._cow:
             return self._cow[key]
-        else:
-            return self._rodict[key]
+
+        return self._rodict[key]
 
     def __setitem__(self, key, val):
         self._cow[key] = val
 
-    def __delitem__(self, key, val):
+    def __delitem__(self, key):
         del self._cow[key]
 
 
@@ -57,14 +53,6 @@ class CalcContainer(object):
 
     _defs = None
     _top = None
-
-    def __init__(self, data):
-        """Initializes with the data to wrap
-
-        Args:
-          data (container type): the data wrapped by the container
-        """
-        pass
 
     def _evaluate_item(self, val):
         """Evaluates an item from the container.
@@ -139,8 +127,8 @@ class CalcDict(CalcContainer, CommentedMap):
     def __getattr__(self, attr):
         if attr in self.keys():
             return self[attr]
-        else:
-            raise AttributeError("Key '{}' not found in dictionary".format(attr))
+
+        raise AttributeError("Key '{}' not found in dictionary".format(attr))
 
 
 def write_csv(conf, data, outdir):
@@ -175,7 +163,7 @@ def write_chart(conf, data, outdir):
             continue
         chart_conf[prop] = value
 
-    if chart_type == "pie" or chart_type == "bar":
+    if chart_type in ("pie", "bar"):
         if chart_type == "pie":
             chart = pygal.Pie(**chart_conf)
         else:
@@ -304,7 +292,7 @@ def main():
             except KeyError:
                 err("Error unsupporter writer: {0}".format(writer_type))
 
-            outdir, ext = os.path.splitext(sys.argv[1])
+            outdir, _ = os.path.splitext(sys.argv[1])
             if os.path.exists(outdir):
                 if not os.path.isdir(outdir):
                     err("Path exists but is not a directory: {0}".format(outdir))
