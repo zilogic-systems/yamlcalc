@@ -1,11 +1,24 @@
 DEFS: |
-  def get_total(journal, cat):
-    total = 0
-    for entry in journal:
-      if entry[3] == cat:
-        total += entry[2]
+  def totals_by_category(categories, journal):
+    totals = {}
+    for cat in categories:
+      sum = 0
+      for item in journal:
+        if item[3] == cat:
+          sum += item[2]
+      totals[cat] = sum
+    return totals
 
-    return total
+VIEW:
+  type: chart
+  chart: bar
+  title: Total Expenses by Category
+  style: dark-green
+  data:
+    columns: ["Total"]
+    rows: = totals_by_category(categories, journal)
+
+categories: ["food", "housing", "leisure", "vehicle"]             
 
 journal:
   - [2016-03-01, rent, 10000, housing]
@@ -19,11 +32,3 @@ journal:
   - [2016-03-08, movie, 360, leisure]
   - [2016-03-08, grocery, 2000, food]
 
-categories: ["food", "housing", "leisure", "vehicle"]
-
-VIEW:
-  type: chart
-  chart: bar
-  table:
-    columns: ["Category", "Total"]
-    rows: = [[cat.title(), get_total(journal, cat)] for cat in categories]
