@@ -121,6 +121,17 @@ class CalcDict(CalcContainer, CommentedMap):
     def __init__(self):
         CommentedMap.__init__(self)
 
+    # Required for Python 2.x
+    def items(self):
+        l = []
+        for x in self.__iter__():
+            l.append((x, self.__getitem__(x)))
+        return l
+
+    def __iter__(self):
+        for item in CommentedMap.__iter__(self):
+            yield item
+
     def __getitem__(self, key):
         if self._top is self:
             if key == "_top":
