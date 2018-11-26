@@ -161,6 +161,39 @@ def write_csv(conf, data, outdir):
             writer.writerow(row)
 
 
+CHART_TYPE_TO_CLASS = {
+    "pie": pygal.Pie,
+    "bar": pygal.Bar,
+    "horizontal-bar": pygal.HorizontalBar,
+    "grouped-bar": pygal.Bar,
+    "stacked-bar": pygal.StackedBar,
+    "line": pygal.Line,
+}
+
+STYLE_TO_CLASS = {
+    "dark": pygal.style.DarkStyle,
+    "neon": pygal.style.NeonStyle,
+    "dark-solarized": pygal.style.DarkSolarizedStyle,
+    "light-solarized": pygal.style.LightSolarizedStyle,
+    "light": pygal.style.LightStyle,
+    "clean": pygal.style.CleanStyle,
+    "red-blue": pygal.style.RedBlueStyle,
+    "dark-colorized": pygal.style.DarkColorizedStyle,
+    "light-colorized": pygal.style.LightColorizedStyle,
+    "turquoise": pygal.style.TurquoiseStyle,
+    "light-green": pygal.style.LightGreenStyle,
+    "dark-green": pygal.style.DarkGreenStyle,
+    "dark-green-blue": pygal.style.DarkGreenBlueStyle,
+    "blue": pygal.style.BlueStyle,
+}
+
+PROPS_SPECIAL = ("type", "chart", "data", "style")
+PROPS_ALLOWED = ("inner_radius", "title", "x_title", "y_title", "width",
+                 "height")
+
+VALUE_SINGLE_CHARTS = ("pie", "bar")
+VALUE_SERIES_CHARTS = ("grouped-bar", "stacked-bar", "line")
+
 def write_chart(conf, data, outdir):
     """Write a chart image.
 
@@ -173,31 +206,43 @@ def write_chart(conf, data, outdir):
     if chart_type is None:
         err("Chart type not specified")
 
-    chart_conf = {}
-    for prop, value in conf.items():
-        if prop in ["table", "chart"]:
-            continue
-        chart_conf[prop] = value
+    try:
+        ChartClass = CHART_TYPE_TO_CLASS[chart_type]
+    except KeyError:
+        err("Invalid chart type '{}'".format(chart_type))
 
-    if chart_type in ("pie", "bar"):
-        if chart_type == "pie":
-            chart = pygal.Pie(**chart_conf)
-        else:
-            chart = pygal.Bar(**chart_conf)
+    if chart_type in VALUE_SINGLE_CHARTS:
+        chart = ChartClass()
+        for key, value in conf["data"]["rows"].items():
+            try:
+                chart.add(key, value[0])
+            except TypeError:
+                chart.add(key, value)
 
-        for row in conf["table"]["rows"]:
-            chart.add(row[0], row[1])
-
-    elif chart_type == "grouped-bar":
-        chart = pygal.Bar(**chart_conf)
-        chart.x_labels = [str(row[0]) for row in conf["table"]["rows"]]
-        for i, col in enumerate(conf["table"]["columns"][1:]):
-            chart.add(col, [row[i+1] for row in conf["table"]["rows"]])
+    elif chart_type in VALUE_SERIES_CHARTS:
+        chart = ChartClass()
+        chart.x_labels = conf["data"]["columns"]
+        for key, value in conf["data"]["rows"].items():
+            chart.add(key, value)
 
     else:
-        err("Unsupported chart type {0}".format(chart_type))
+        err("Unsupported chart type '{}'".format(chart_type))
 
-    with open(os.path.join(outdir, "chart.svg"), "w") as outfp:
+    if "style" in conf:
+        chart_style = conf["style"]
+        if chart_style not in STYLE_TO_CLASS:
+            err("Invalid chart style '{}'".format(chart_style))
+        chart.style = STYLE_TO_CLASS[chart_style]
+
+    for prop in conf:
+        if prop in PROPS_SPECIAL:
+            continue
+        elif prop in PROPS_ALLOWED:
+            setattr(chart, prop, conf[prop])
+        else:
+            err("Invalid chart property '{}'".format(prop))
+
+    with open(os.path.join(outdir, "chart.svg"), "wb") as outfp:
         outfp.write(chart.render())
 
 
