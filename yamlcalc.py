@@ -63,7 +63,12 @@ class CalcContainer(object):
         Args:
           key: specifies the element to access
         """
-        if isinstance(val, str):
+        if (sys.version_info > (3, 0)):
+            ustr = str
+        else:
+            ustr = unicode
+        
+        if isinstance(val, str) or isinstance(val, ustr):
             stripped = val.strip()
             if stripped[0] == ("="):
                 try:
