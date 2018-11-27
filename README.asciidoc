@@ -345,18 +345,11 @@ VIEW:
   type: chart
   chart: pie
   inner_radius: 0.4
-  columns:
-  - title: Housing
-    value: = sum(i[2] for i in journal if i[3] == "housing")
-
-  - title: Leisure
-    value: = sum(i[2] for i in journal if i[3] == "leisure")
-
-  - title: Food
-    value: = sum(i[2] for i in journal if i[3] == "food")
-
-  - title: Vehicle
-    value: = sum(i[2] for i in journal if i[3] == "vehicle")
+  rows:
+    - [Housing, "= sum(i[2] for i in journal if i[3] == 'housing')"]
+    - [Leisure, "= sum(i[2] for i in journal if i[3] == 'leisure')"]
+    - [Food, "= sum(i[2] for i in journal if i[3] == 'food')"]
+    - [Vehicle, "= sum(i[2] for i in journal if i[3] == 'vehicle')"]
 ------
 
 |

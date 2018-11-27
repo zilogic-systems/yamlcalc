@@ -24,6 +24,5 @@ t:
 
 VIEW:
   type: csv
-  table:
-    columns: ["Name", "Amount"]
-    rows: = [[s.name, s.rem] for s in t.students]
+  cols: ["Name", "Amount"]
+  rows: = [[s.name, s.rem] for s in t.students]

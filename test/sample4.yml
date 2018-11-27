@@ -1,12 +1,12 @@
 DEFS: |
   def totals_by_category(categories, journal):
-    totals = {}
+    totals = []
     for cat in categories:
       sum = 0
       for item in journal:
         if item[3] == cat:
           sum += item[2]
-      totals[cat] = sum
+      totals.append([cat, sum])
     return totals
 
 VIEW:
@@ -14,9 +14,8 @@ VIEW:
   chart: bar
   title: Total Expenses by Category
   style: dark-green
-  data:
-    columns: ["Total"]
-    rows: = totals_by_category(categories, journal)
+  cols: ["Category", "Total"]
+  rows: = totals_by_category(categories, journal)
 
 categories: ["food", "housing", "leisure", "vehicle"]             
 

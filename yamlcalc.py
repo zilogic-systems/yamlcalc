@@ -108,8 +108,11 @@ class CalcContainer(object):
 
 class CalcList(CalcContainer, CommentedSeq):
     """list like class that provides exp. evaluation."""
-    def __init__(self):
-        CommentedSeq.__init__(self)
+    def __init__(self, init=None):
+        if init is not None:
+            CommentedSeq.__init__(self, init)
+        else:
+            CommentedSeq.__init__(self)
 
     def __getitem__(self, key):
         val = CommentedSeq.__getitem__(self, key)
@@ -157,7 +160,7 @@ def write_csv(conf, data, outdir):
     """
     with open(os.path.join(outdir, "data.csv"), "w") as outfp:
         writer = csv.writer(outfp)
-        for row in conf["table"]["rows"]:
+        for row in conf["rows"]:
             writer.writerow(row)
 
 
@@ -187,7 +190,7 @@ STYLE_TO_CLASS = {
     "blue": pygal.style.BlueStyle,
 }
 
-PROPS_SPECIAL = ("type", "chart", "data", "style")
+PROPS_SPECIAL = ("type", "chart", "cols", "rows", "style")
 PROPS_ALLOWED = ("inner_radius", "title", "x_title", "y_title", "width",
                  "height")
 
@@ -213,17 +216,14 @@ def write_chart(conf, data, outdir):
 
     if chart_type in VALUE_SINGLE_CHARTS:
         chart = ChartClass()
-        for key, value in conf["data"]["rows"].items():
-            try:
-                chart.add(key, value[0])
-            except TypeError:
-                chart.add(key, value)
+        for row in conf["rows"]:
+            chart.add(row[0], row[1])
 
     elif chart_type in VALUE_SERIES_CHARTS:
         chart = ChartClass()
-        chart.x_labels = conf["data"]["columns"]
-        for key, value in conf["data"]["rows"].items():
-            chart.add(key, value)
+        chart.x_labels = conf["cols"][1:]
+        for row in conf["rows"]:
+            chart.add(row[0], row[1:])
 
     else:
         err("Unsupported chart type '{}'".format(chart_type))
