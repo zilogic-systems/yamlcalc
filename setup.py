@@ -6,11 +6,14 @@ setup(name="yamlcalc",
       author="Vijay Kumar B.",
       author_email="vijaykumar@zilogic.com",
       url="http://github.com/zilogic-systems/pyyaml",
-      py_modules=["yamlcalc"],
+      packages=["yamlcalc"],
       entry_points={
           "console_scripts": [
-              "yamlcalc = yamlcalc:main"
+              "yc-calc = yamlcalc.calc:main",
+              "yc-csv = yamlcalc.csv:main",
+              "yc-chart = yamlcalc.chart:main",
+              "yc-asciidoc = yamlcalc.asciidoc:main",
           ],
       },
-      install_requires=["pyyaml", "pygal"]
+      install_requires=["ruamel.yaml", "pygal", "jsonpath_rw"]
       )
