@@ -2,12 +2,11 @@
 
 """YAML and Python based spreadsheet equivalent.
 
-Usage: yamlcalc <infile>
+Usage: yc-calc <infile> <outfile>
 """
 
 import os
 import os.path
-import csv
 import sys
 
 from ruamel import yaml
@@ -16,8 +15,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.comments import CommentedSeq
 from ruamel.yaml import RoundTripConstructor
 from ruamel.yaml import RoundTripRepresenter
-
-import pygal
 
 class COWDict(object):
     """Wraps a read-only dictionary, locally storing changes made."""
@@ -150,124 +147,14 @@ class CalcDict(CalcContainer, CommentedMap):
         raise AttributeError("Key '{}' not found in dictionary".format(attr))
 
 
-def write_csv(conf, data, outdir):
-    """Write a CSV file.
-
-    Args:
-      conf (dict): writer parameters
-      data (dict): parsed YAML data
-      outdir (str): directory to write to
-    """
-    with open(os.path.join(outdir, "data.csv"), "w") as outfp:
-        writer = csv.writer(outfp)
-        for row in conf["rows"]:
-            writer.writerow(row)
-
-
-CHART_TYPE_TO_CLASS = {
-    "pie": pygal.Pie,
-    "bar": pygal.Bar,
-    "horizontal-bar": pygal.HorizontalBar,
-    "grouped-bar": pygal.Bar,
-    "stacked-bar": pygal.StackedBar,
-    "line": pygal.Line,
-}
-
-STYLE_TO_CLASS = {
-    "dark": pygal.style.DarkStyle,
-    "neon": pygal.style.NeonStyle,
-    "dark-solarized": pygal.style.DarkSolarizedStyle,
-    "light-solarized": pygal.style.LightSolarizedStyle,
-    "light": pygal.style.LightStyle,
-    "clean": pygal.style.CleanStyle,
-    "red-blue": pygal.style.RedBlueStyle,
-    "dark-colorized": pygal.style.DarkColorizedStyle,
-    "light-colorized": pygal.style.LightColorizedStyle,
-    "turquoise": pygal.style.TurquoiseStyle,
-    "light-green": pygal.style.LightGreenStyle,
-    "dark-green": pygal.style.DarkGreenStyle,
-    "dark-green-blue": pygal.style.DarkGreenBlueStyle,
-    "blue": pygal.style.BlueStyle,
-}
-
-PROPS_SPECIAL = ("type", "chart", "cols", "rows", "style")
-PROPS_ALLOWED = ("inner_radius", "title", "x_title", "y_title", "width",
-                 "height")
-
-VALUE_SINGLE_CHARTS = ("pie", "bar")
-VALUE_SERIES_CHARTS = ("grouped-bar", "stacked-bar", "line")
-
-def write_chart(conf, data, outdir):
-    """Write a chart image.
-
-    Args:
-      conf (dict): writer parameters
-      data (dict): parsed YAML data
-      outdir (str): directory to write to
-    """
-    chart_type = conf.get("chart", None)
-    if chart_type is None:
-        err("Chart type not specified")
-
-    try:
-        ChartClass = CHART_TYPE_TO_CLASS[chart_type]
-    except KeyError:
-        err("Invalid chart type '{}'".format(chart_type))
-
-    if chart_type in VALUE_SINGLE_CHARTS:
-        chart = ChartClass()
-        for row in conf["rows"]:
-            chart.add(row[0], row[1])
-
-    elif chart_type in VALUE_SERIES_CHARTS:
-        chart = ChartClass()
-        chart.x_labels = conf["cols"][1:]
-        for row in conf["rows"]:
-            chart.add(row[0], row[1:])
-
-    else:
-        err("Unsupported chart type '{}'".format(chart_type))
-
-    if "style" in conf:
-        chart_style = conf["style"]
-        if chart_style not in STYLE_TO_CLASS:
-            err("Invalid chart style '{}'".format(chart_style))
-        chart.style = STYLE_TO_CLASS[chart_style]
-
-    for prop in conf:
-        if prop in PROPS_SPECIAL:
-            continue
-        elif prop in PROPS_ALLOWED:
-            setattr(chart, prop, conf[prop])
-        else:
-            err("Invalid chart property '{}'".format(prop))
-
-    with open(os.path.join(outdir, "chart.svg"), "wb") as outfp:
-        outfp.write(chart.render())
-
-
-def write_asciidoc_attrs(conf, data, outdir):
-    """Write a include set of asciidoc attributes.
-
-    Args:
-      conf (dict): writer parameters
-      data (dict): parsed YAML data
-      outdir (str): directory to write to
-    """
-    with open(os.path.join(outdir, "attrs.adoc"), "w") as outfp:
-        for key, value in conf["value"].iteritems():
-            outfp.write("{{set:{0}:{1}}}\n".format(key, value))
-
-
-def write_raw(conf, data, outdir):
+def write(data, outfile):
     """Write the expanded YAML file.
 
     Args:
-      conf (dict): writer parameters
       data (dict): parsed YAML data
-      outdir (str): directory to write to
+      outfile (str): filename to write to
     """
-    with open(os.path.join(outdir, "raw.yml"), "w") as outfp:
+    with open(outfile, "w") as outfp:
         YAML().dump(data, outfp)
 
 
@@ -309,9 +196,12 @@ def err(msg):
 
 def main():
     """Main application entry point."""
-    if len(sys.argv) != 2:
-        print("Usage: yamlcalc <input-file>")
-        return
+    if len(sys.argv) != 3:
+        print("Usage: yc-calc <input-file> <output-file>")
+        sys.exit(1)
+
+    infile = sys.argv[1]
+    outfile = sys.argv[2]
 
     mapping_tag = yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG
     sequence_tag = yaml.resolver.BaseResolver.DEFAULT_SEQUENCE_TAG
@@ -327,7 +217,7 @@ def main():
                          Dumper=RoundTripRepresenter)
 
     try:
-        with open(sys.argv[1]) as infp:
+        with open(infile) as infp:
             top = YAML().load(infp)
 
             if not isinstance(top, CalcDict):
@@ -343,27 +233,7 @@ def main():
                 err("Error executing DEFS: {0}".format(exc))
 
             CalcContainer.set_top(defs, top)
-
-            view = top.get("VIEW", {})
-            writer_type = view.get("type", "raw")
-            writer_func_name = "_".join(writer_type.split("-"))
-
-            try:
-                write = globals()["write_" + writer_func_name]
-            except KeyError:
-                err("Error unsupporter writer: {0}".format(writer_type))
-
-            outdir, _ = os.path.splitext(sys.argv[1])
-            if os.path.exists(outdir):
-                if not os.path.isdir(outdir):
-                    err("Path exists but is not a directory: {0}".format(outdir))
-            else:
-                try:
-                    os.mkdir(outdir)
-                except OSError as exc:
-                    err("Error create directory: {0}".format(outdir))
-
-            write(view, top, outdir)
+            write(top, outfile)
     except IOError as exc:
         err("Error opening file: {0}".format(exc))
     except yaml.YAMLError as exc:
