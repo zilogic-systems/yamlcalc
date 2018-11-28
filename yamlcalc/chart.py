@@ -101,7 +101,7 @@ def main():
     """Main application entry point."""
 
     if len(sys.argv) != 4:
-        print("Usage: yc-chart <yaml-file> <path-to-view> <csv-file>")
+        print("Usage: yc-chart <yaml-file> <path-to-view> <chart-file>")
         sys.exit(1)
 
     infile = sys.argv[1]
