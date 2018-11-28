@@ -356,7 +356,7 @@ VIEW:
 
 |
 
-image::test/sample4.png?raw=true[width=320]
+image::tests/sample4.png?raw=true[width=320]
 
 |======
 
