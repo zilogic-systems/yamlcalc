@@ -306,7 +306,13 @@ x: = abc(1, 2, 3)
 
 [source,yaml]
 ------
-DEFS: "import math\n\ndef abc(a, b, c):\n  return a + b + c\n"
+DEFS: \|2
+
+  import math
+
+  def abc(a, b, c):
+    return a + b + c
+
 a: 0.8414709848078965
 x: 6
 ------
