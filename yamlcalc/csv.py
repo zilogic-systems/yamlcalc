@@ -20,6 +20,11 @@ def write_csv(conf, data, outfile):
     """
     with open(outfile, "w") as outfp:
         writer = csv.writer(outfp)
+        try:
+            writer.writerow(conf["cols"])
+        except KeyError:
+            pass
+
         for row in conf["rows"]:
             writer.writerow(row)
 
