@@ -331,6 +331,10 @@ data. Charts are generated using `pygal`.
 
 [source,yaml]
 ------
+DEFS: |
+  def sum_for_cat(journal, cat):
+    return sum(i[2] for i in journal if i[3] == cat)
+
 journal:
   - [2016-03-01, rent, 10000, housing]
   - [2016-03-02, fuel, 300, vehicle]
@@ -348,10 +352,10 @@ VIEW:
   chart: pie
   inner_radius: 0.4
   rows:
-    - [Housing, "= sum(i[2] for i in journal if i[3] == 'housing')"]
-    - [Leisure, "= sum(i[2] for i in journal if i[3] == 'leisure')"]
-    - [Food, "= sum(i[2] for i in journal if i[3] == 'food')"]
-    - [Vehicle, "= sum(i[2] for i in journal if i[3] == 'vehicle')"]
+    - [Housing, "= sum_for_cat(journal, 'housing')"]
+    - [Leisure, "= sum_for_cat(journal, 'leisure')"]
+    - [Food, "= sum_for_cat(journal, 'food')"]
+    - [Vehicle, "= sum_for_cat(journal, 'vehicle')"]
 ------
 
 |
