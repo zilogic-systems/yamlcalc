@@ -331,7 +331,7 @@ data. Charts are generated using `pygal`.
 
 [source,yaml]
 ------
-DEFS: |
+DEFS: \|
   def sum_for_cat(journal, cat):
     return sum(i[2] for i in journal if i[3] == cat)
 
