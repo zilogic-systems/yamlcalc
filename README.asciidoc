@@ -262,12 +262,8 @@ products:
   
 VIEW:
   type: csv
-  columns:
-    - title: Name
-      value: [p.name for p in products]
-
-    - title: Price
-      value: [p.total for p in products]
+  cols: [Name, Price]
+  rows: = [[p.name, p.total] for p in products]
 ------
 
 |
